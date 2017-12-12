@@ -1,6 +1,15 @@
 import json
 
 from project.tests.base import BaseTestCase
+from project.api.models import User
+from project import db
+
+
+def add_user(username, email):
+    user = User(username=username, email=email)
+    db.session.add(user)
+    db.session.commit()
+    return user
 
 
 class TestUserService(BaseTestCase):
@@ -80,3 +89,49 @@ class TestUserService(BaseTestCase):
             self.assertEqual(response.status_code, 400)
             self.assertIn('fail', data['status'])
             self.assertIn('Email already exists', data['message'])
+
+    def test_single_user_no_id(self):
+        """Ensure error is thrown if an id is not provided."""
+        with self.client:
+            response = self.client.get('/users/foo')
+            data = json.loads(response.data.decode())
+            self.assertEqual(response.status_code, 404)
+            self.assertIn('User does not exists', data['message'])
+            self.assertIn('fail', data['status'])
+
+    def test_single_user_incorrect_id(self):
+        """Ensure error is thrown if the id does not exist."""
+        with self.client:
+            response = self.client.get('/users/1000')
+            data = json.loads(response.data.decode())
+            self.assertEqual(response.status_code, 404)
+            self.assertIn('User does not exists', data['message'])
+            self.assertIn('fail', data['status'])
+
+    def test_single_user(self):
+        """Ensure get single user behaves correctly."""
+        user = add_user('tom', 'tom@foo.com')
+        with self.client:
+            response = self.client.get(f'/users/{user.id}')
+            data = json.loads(response.data.decode())
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue('created_at' in data['data'])
+            self.assertIn('success', data['status'])
+            self.assertIn('tom', data['data']['username'])
+            self.assertIn('tom@foo.com', data['data']['email'])
+
+    def test_all_user(self):
+        """Ensure get all users behaves correctly."""
+        add_user('tom', 'tom@foo.com')
+        add_user('jerry', 'jerry@foo.com')
+        with self.client:
+            response = self.client.get('/users')
+            data = json.loads(response.data.decode())
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue('created_at' in data['data']['users'][0])
+            self.assertTrue('created_at' in data['data']['users'][1])
+            self.assertIn('success', data['status'])
+            self.assertIn('tom', data['data']['users'][0]['username'])
+            self.assertIn('tom@foo.com', data['data']['users'][0]['email'])
+            self.assertIn('jerry', data['data']['users'][1]['username'])
+            self.assertIn('jerry@foo.com', data['data']['users'][1]['email'])
