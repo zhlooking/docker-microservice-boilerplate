@@ -1,5 +1,3 @@
-import unittest
-
 from flask import current_app
 from flask_testing import TestCase
 
@@ -49,4 +47,3 @@ class TestProductionConfig(TestCase):
         self.assertTrue(app.config['SECRET_KEY'] == 'my_precious')
         self.assertFalse(app.config['DEBUG'])
         self.assertFalse(app.config['TESTING'])
-
