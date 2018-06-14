@@ -4,6 +4,7 @@ import axios from 'axios'
 import PropTypes from 'prop-types'
 import { observer, inject } from 'mobx-react'
 import UserStore from '../store/user-store'
+import UserList from './user_list'
 import '../css/users.scss'
 
 @inject('userStore')
@@ -51,15 +52,8 @@ export default class Users extends React.Component {
         <ul>{
            filteredUsers.map(user => <li className="user" key={user}>{user}</li>)
          }
-          {this.state.users.map((user) => (
-            <h4
-              key={user.id}
-              className="card card-body bg-light"
-            >{ user.username }
-            </h4>
-          ))
-            }
         </ul>
+        <UserList users={this.state.users} />
       </div>
     )
   }

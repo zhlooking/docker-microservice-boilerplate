@@ -1,6 +1,8 @@
 __pycache__
 env
 .idea/
-
-/node_modules/
 project/.DS_Store
+
+node_modules
+coverage
+yarn.lock
