@@ -9,10 +9,11 @@
   "scripts": {
     "lint": "eslint ./src",
     "clean": "rm -rf dist",
-    "dev": "NODE_ENV=dev DEPLOY_ENV=dev webpack-dev-server --progress --colors --config ./build/webpack.dev.js --hot --host 127.0.0.1",
-    "build": "npm run clean && cd build && NODE_ENV=production webpack --progress --profile --colors",
-    "build-test": "npm run clean && cd build && NODE_ENV=production DEPLOY_ENV=test webpack --progress --profile --colors",
-    "test": "jest --forceExit --verbose --detectOpenHandles"
+    "dev": "NODE_ENV=dev DEPLOY_ENV=dev webpack-dev-server --progress --colors --config build --hot --host 127.0.0.1",
+    "build": "npm run clean && NODE_ENV=prod webpack --config build --progress --profile --colors && npm run copy",
+    "build-test": "npm run clean && NODE_ENV=prod DEPLOY_ENV=test webpack --config build --progress --profile --colors && npm run copy",
+    "test": "jest --forceExit --verbose --detectOpenHandles",
+    "copy": "rimraf dist_runtime && cp -r dist dist_runtime"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0-beta.44",
