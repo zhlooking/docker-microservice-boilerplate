@@ -5,6 +5,7 @@ import PropTypes from 'prop-types'
 import { observer, inject } from 'mobx-react'
 import UserStore from '../store/user-store'
 import UserList from './user_list'
+import AddUser from './add_user'
 import '../css/users.scss'
 
 @inject('userStore')
@@ -14,8 +15,17 @@ export default class Users extends React.Component {
     userStore: PropTypes.instanceOf(UserStore).isRequired,
   }
 
-  state = {
-    users: [],
+  constructor(props) {
+    super(props)
+
+    this.state = {
+      users: [],
+      email: '',
+      username: '',
+    }
+
+    this.handleAddNewUser = this.handleAddNewUser.bind(this)
+    this.handleUserChange = this.handleUserChange.bind(this)
   }
 
   componentDidMount() {
@@ -28,16 +38,34 @@ export default class Users extends React.Component {
       .catch((err) => { console.log(err) })
   }
 
+  addNewUser = () => {
+    const { username, email } = this.state
+
+    axios.post(`${REACT_APP_USERS_SERVICE_URL}/users`, {
+      email,
+      username,
+    })
+      .then(() => {
+        this.fetchUsers()
+        this.setState({ username: '', email: '' })
+      })
+      .catch(err => { console.log(err) })
+  }
+
   filter = (evt) => {
     this.props.userStore.filter = evt.target.value
   }
 
-  createNew = (evt) => {
-    if (evt.which === 13) {
-      this.props.userStore.createUser(evt.target.value)
-      // eslint-disable-next-line
-      evt.target.value = ''
-    }
+  handleUserChange = evt => {
+    const { name, value } = evt.target
+
+    this.setState({ [name]: value })
+  }
+
+  handleAddNewUser = evt => {
+    evt.preventDefault()
+
+    this.addNewUser()
   }
 
   render() {
@@ -53,6 +81,12 @@ export default class Users extends React.Component {
            filteredUsers.map(user => <li className="user" key={user}>{user}</li>)
          }
         </ul>
+        <AddUser
+          username={this.state.username}
+          email={this.state.email}
+          onChange={this.handleUserChange}
+          onSubmit={this.handleAddNewUser}
+        />
         <UserList users={this.state.users} />
       </div>
     )
